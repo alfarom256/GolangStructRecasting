@@ -2,11 +2,9 @@ package main
 
 import (
 	"fmt"
-	"unsafe"
 	"math"
+	"unsafe"
 )
-
-type test func()
 
 // make a big struct with some data we want to put into memory
 // at the end with length N and total size K (struct + payload)
@@ -29,8 +27,8 @@ type smaller_struct struct {
 	x4 uint64
 }
 
-func main(){
-	fmt.Println("Allocating objects...");
+func main() {
+	fmt.Println("Allocating objects...")
 	large := larger_struct{
 		a1: 0xFAFAFAFAFAFAFAFA,
 		a2: 0xFFFFFFFFFFFFFFFF,
@@ -56,7 +54,7 @@ func main(){
 	large_addr := uintptr(unsafe.Pointer(&large))
 
 	// store a copy of the memory region
-	large_orig := dumpMemSize(large_addr, 4 * uint32(unsafe.Sizeof(large)))
+	large_orig := dumpMemSize(large_addr, 4*uint32(unsafe.Sizeof(large)))
 
 	//pretty print it
 	prettyMemPrint(large_orig, large_addr)
@@ -90,14 +88,13 @@ func main(){
 	fmt.Println("Assigning new values to struct")
 	fmt.Println("Contents of New Memory (dumping 2x):\n")
 
-	large_new := dumpMemSize(large_addr, 4 * uint32(unsafe.Sizeof(large)))
+	large_new := dumpMemSize(large_addr, 4*uint32(unsafe.Sizeof(large)))
 	prettyMemPrint(large_new, large_addr)
-
 
 }
 
 // "trying to make stuff on the heap", I said at 4am
-func dummyHeapTest(large larger_struct) larger_struct{
+func dummyHeapTest(large larger_struct) larger_struct {
 	return larger_struct{
 		large.a1,
 		large.a2,
@@ -109,7 +106,7 @@ func dummyHeapTest(large larger_struct) larger_struct{
 	}
 }
 
-func dumpMem(begin uintptr, end uintptr) []byte{
+func dumpMem(begin uintptr, end uintptr) []byte {
 	size_of_mem := uint(begin - end)
 	out := make([]byte, size_of_mem)
 	for i := range out {
@@ -118,7 +115,7 @@ func dumpMem(begin uintptr, end uintptr) []byte{
 	return out
 }
 
-func dumpMemSize(begin uintptr, size uint32) []byte{
+func dumpMemSize(begin uintptr, size uint32) []byte {
 	out := make([]byte, size)
 	for i := range out {
 		out[i] = *((*byte)(unsafe.Pointer(uintptr(begin) + uintptr(i))))
@@ -126,31 +123,31 @@ func dumpMemSize(begin uintptr, size uint32) []byte{
 	return out
 }
 
-func prettyMemPrint(mem []byte, begin uintptr){
+func prettyMemPrint(mem []byte, begin uintptr) {
 	count := len(mem)
 	row_count := math.Ceil(float64(count) / 16)
 	row_remainder := count % 16
 	row_remainder--
 	rows := make([][]byte, int(row_count))
 
-	for i := range rows{
+	for i := range rows {
 		rows[i] = make([]byte, 16)
 	}
 
-	for i := 0; i < int(row_count); i++{
+	for i := 0; i < int(row_count); i++ {
 		_begin := i * 16
 		_end := _begin + 15
-		if i + 1 >= int(row_count){
-			if row_remainder == -1{ // if the memory we're analyzing fits perfectly into 16 bytes, don't bother trimming
+		if i+1 >= int(row_count) {
+			if row_remainder == -1 { // if the memory we're analyzing fits perfectly into 16 bytes, don't bother trimming
 				continue
 			}
 			_end = _begin + row_remainder
 		}
 		rows[i] = mem[_begin:_end]
 	}
-	for i := range rows{
+	for i := range rows {
 		fmt.Printf("\n")
-		for j := range rows[i]{
+		for j := range rows[i] {
 			fmt.Printf("%x ", rows[i][j])
 		}
 	}
